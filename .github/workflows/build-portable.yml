@@ -16,10 +16,17 @@ permissions:
   contents: write
 
 jobs:
-  portable:
+  # Each build runs on its own fresh runner: PostSharp fails with a license error
+  # when it compiles the project a second time on the same machine.
+  build:
     runs-on: windows-latest
-    env:
-      PUBLISH_RELEASE: ${{ github.ref == 'refs/heads/claude/portable-windows-no-admin-wz9yh4' || startsWith(github.ref, 'refs/tags/portable-') }}
+    strategy:
+      matrix:
+        include:
+          - name: BedrockLauncher-portable-win-x64
+            self-contained: true
+          - name: BedrockLauncher-win-x64
+            self-contained: false
 
     steps:
       - name: Checkout code
@@ -33,33 +40,33 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Publish self-contained (win-x64)
-        run: dotnet publish BedrockLauncher/BedrockLauncher.csproj --configuration Release --runtime win-x64 --self-contained true --output out/BedrockLauncher-portable-win-x64
+      - name: Publish (win-x64, self-contained ${{ matrix.self-contained }})
+        run: dotnet publish BedrockLauncher/BedrockLauncher.csproj --configuration Release --runtime win-x64 --self-contained ${{ matrix.self-contained }} --output out/${{ matrix.name }}
 
-      - name: Publish framework-dependent (win-x64)
-        run: dotnet publish BedrockLauncher/BedrockLauncher.csproj --configuration Release --runtime win-x64 --self-contained false --output out/BedrockLauncher-win-x64
-
-      - name: Upload portable build
+      - name: Upload build
         uses: actions/upload-artifact@v4
         with:
-          name: BedrockLauncher-portable-win-x64
-          path: out/BedrockLauncher-portable-win-x64
+          name: ${{ matrix.name }}
+          path: out/${{ matrix.name }}
 
-      - name: Upload framework-dependent build
-        uses: actions/upload-artifact@v4
+  release:
+    needs: build
+    if: github.ref == 'refs/heads/claude/portable-windows-no-admin-wz9yh4' || startsWith(github.ref, 'refs/tags/portable-')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download builds
+        uses: actions/download-artifact@v4
         with:
-          name: BedrockLauncher-win-x64
-          path: out/BedrockLauncher-win-x64
+          path: out
 
       - name: Zip builds
-        if: env.PUBLISH_RELEASE == 'true'
-        shell: pwsh
+        working-directory: out
         run: |
-          Compress-Archive -Path out/BedrockLauncher-portable-win-x64 -DestinationPath out/BedrockLauncher-portable-win-x64.zip
-          Compress-Archive -Path out/BedrockLauncher-win-x64 -DestinationPath out/BedrockLauncher-win-x64.zip
+          zip -qr BedrockLauncher-portable-win-x64.zip BedrockLauncher-portable-win-x64
+          zip -qr BedrockLauncher-win-x64.zip BedrockLauncher-win-x64
 
       - name: Publish release
-        if: env.PUBLISH_RELEASE == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('portable-v{0}', github.run_number) }}
@@ -77,7 +84,7 @@ jobs:
 
             1. Download one of the zips below.
             2. Right-click it, then **Extract All** to a folder you can write to, such as `Documents`.
-            3. Open the extracted folder and run `BedrockLauncher.exe`.
+            3. Open the extracted folder and run `BedrockLauncher.exe`. With `BedrockLauncher-win-x64.zip` you can instead start it from that folder with `"%LOCALAPPDATA%\Microsoft\dotnet\dotnet.exe" BedrockLauncher.dll`.
 
             If SmartScreen blocks it, click **More info** then **Run anyway**. If that button is missing, right-click the downloaded zip, choose **Properties**, tick **Unblock**, click **OK**, and extract it again.
 
