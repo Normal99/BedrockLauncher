@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
@@ -71,12 +72,12 @@ namespace JemExtensions
             string fullTargetPath = Path.GetFullPath(targetPath);
             if (fullTargetPath.StartsWith(@"\\"))
             {
-                System.Diagnostics.Trace.WriteLine($"Cannot create junction to network path: {fullTargetPath}");
+                Trace.WriteLine($"Cannot create junction to network path: {fullTargetPath}");
                 return false;
             }
             if (Directory.Exists(linkPath) || File.Exists(linkPath))
             {
-                System.Diagnostics.Trace.WriteLine($"Cannot create junction, path already exists: {linkPath}");
+                Trace.WriteLine($"Cannot create junction, path already exists: {linkPath}");
                 return false;
             }
 
@@ -103,15 +104,15 @@ namespace JemExtensions
                     if (!handle.IsInvalid &&
                         DeviceIoControl(handle, FSCTL_SET_REPARSE_POINT, buffer, buffer.Length, IntPtr.Zero, 0, out _, IntPtr.Zero))
                     {
-                        System.Diagnostics.Trace.WriteLine($"Created junction {linkPath} -> {fullTargetPath}");
+                        Trace.WriteLine($"Created junction {linkPath} -> {fullTargetPath}");
                         return true;
                     }
-                    System.Diagnostics.Trace.WriteLine($"Failed to create junction {linkPath} -> {fullTargetPath} (error {Marshal.GetLastWin32Error()})");
+                    Trace.WriteLine($"Failed to create junction {linkPath} -> {fullTargetPath} (error {Marshal.GetLastWin32Error()})");
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine($"Failed to create junction {linkPath} -> {fullTargetPath}: {ex.Message}");
+                Trace.WriteLine($"Failed to create junction {linkPath} -> {fullTargetPath}: {ex.Message}");
             }
 
             // Remove the empty placeholder directory so a later attempt starts clean
