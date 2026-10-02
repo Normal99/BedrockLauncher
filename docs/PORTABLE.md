@@ -6,7 +6,8 @@ The normal release is *framework-dependent*: it needs the .NET 8 Desktop Runtime
 A self-contained build carries its own copy of the .NET runtime in the launcher folder, so nothing has to be installed.
 
 **Get a build**
-- From GitHub Actions: open the **Build Portable** workflow, pick a successful run (or start one with **Run workflow**) and download the `BedrockLauncher-portable-win-x64` artifact.
+- From the repository's **Releases** page: download `BedrockLauncher-portable-win-x64.zip` from the latest "BedrockLauncher Portable" release. No GitHub account needed.
+- From GitHub Actions: open the **Build Portable** workflow, pick a successful run and download the `BedrockLauncher-portable-win-x64` artifact (needs a GitHub login).
 - Or build it yourself on any machine with the .NET 8 SDK:
   ```
   BedrockLauncher\Properties\PublishProfiles\PublishPortable.bat
