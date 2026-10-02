@@ -1,0 +1,35 @@
+name: Build Portable
+
+# Produces a self-contained build that runs without installing the .NET Desktop Runtime.
+# Download it from the run's "Artifacts" section, unzip it anywhere (e.g. Documents or a USB stick)
+# and run BedrockLauncher.exe.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: '*'
+
+jobs:
+  portable:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Checkout submodules
+        run: git submodule update --remote --init --recursive
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Publish self-contained (win-x64)
+        run: dotnet publish BedrockLauncher/BedrockLauncher.csproj --configuration Release --runtime win-x64 --self-contained true --output out/BedrockLauncher-portable-win-x64
+
+      - name: Upload portable build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BedrockLauncher-portable-win-x64
+          path: out/BedrockLauncher-portable-win-x64

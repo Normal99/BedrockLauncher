@@ -12,6 +12,7 @@ An unofficial **Minecraft Bedrock** launcher that enables similar features to th
 This launcher has both hardware and software prerequisites to ensure quality, performance, and stability:
 - [Hardware prerequisites](./docs/HARDWARE_PREREQUISITES.md)
 - [Software prerequisites](./docs/SOFTWARE_PREREQUISITES.md)
+- [Running without admin rights (portable)](./docs/PORTABLE.md)
 
 ## Disclaimers
 We specify disclaimers to ensure we go "told ya!" if anything happens:
