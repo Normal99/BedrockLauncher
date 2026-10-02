@@ -9,7 +9,7 @@ name: Build Portable
 on:
   workflow_dispatch:
   push:
-    branches: '*'
+    branches: '**'
     tags: 'portable-*'
 
 permissions:
