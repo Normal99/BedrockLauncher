@@ -36,16 +36,27 @@ jobs:
       - name: Publish self-contained (win-x64)
         run: dotnet publish BedrockLauncher/BedrockLauncher.csproj --configuration Release --runtime win-x64 --self-contained true --output out/BedrockLauncher-portable-win-x64
 
+      - name: Publish framework-dependent (win-x64)
+        run: dotnet publish BedrockLauncher/BedrockLauncher.csproj --configuration Release --runtime win-x64 --self-contained false --output out/BedrockLauncher-win-x64
+
       - name: Upload portable build
         uses: actions/upload-artifact@v4
         with:
           name: BedrockLauncher-portable-win-x64
           path: out/BedrockLauncher-portable-win-x64
 
-      - name: Zip portable build
+      - name: Upload framework-dependent build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BedrockLauncher-win-x64
+          path: out/BedrockLauncher-win-x64
+
+      - name: Zip builds
         if: env.PUBLISH_RELEASE == 'true'
         shell: pwsh
-        run: Compress-Archive -Path out/BedrockLauncher-portable-win-x64 -DestinationPath out/BedrockLauncher-portable-win-x64.zip
+        run: |
+          Compress-Archive -Path out/BedrockLauncher-portable-win-x64 -DestinationPath out/BedrockLauncher-portable-win-x64.zip
+          Compress-Archive -Path out/BedrockLauncher-win-x64 -DestinationPath out/BedrockLauncher-win-x64.zip
 
       - name: Publish release
         if: env.PUBLISH_RELEASE == 'true'
@@ -55,11 +66,16 @@ jobs:
           name: BedrockLauncher Portable (build ${{ github.run_number }})
           target_commitish: ${{ github.sha }}
           make_latest: true
-          files: out/BedrockLauncher-portable-win-x64.zip
+          files: |
+            out/BedrockLauncher-portable-win-x64.zip
+            out/BedrockLauncher-win-x64.zip
           body: |
-            Portable build of BedrockLauncher for 64-bit Windows. It includes .NET, so nothing needs to be installed and no admin rights are needed to run it.
+            Builds of BedrockLauncher for 64-bit Windows. Neither needs admin rights to run.
 
-            1. Download `BedrockLauncher-portable-win-x64.zip` below.
+            - `BedrockLauncher-portable-win-x64.zip` includes .NET, so nothing needs to be installed.
+            - `BedrockLauncher-win-x64.zip` is smaller and uses the .NET 8 Desktop Runtime already on the PC, including one installed for your user only with `DOTNET_ROOT` set (see docs/PORTABLE.md, option 2).
+
+            1. Download one of the zips below.
             2. Right-click it, then **Extract All** to a folder you can write to, such as `Documents`.
             3. Open the extracted folder and run `BedrockLauncher.exe`.
 

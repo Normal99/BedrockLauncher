@@ -30,7 +30,9 @@ $dotnet = "$env:LOCALAPPDATA\Microsoft\dotnet"
 [Environment]::SetEnvironmentVariable('DOTNET_ROOT', $dotnet, 'User')
 ```
 
-Sign out and back in (or restart Explorer) so the new `DOTNET_ROOT` is picked up, then run `BedrockLauncher.exe`.
+Sign out and back in (or restart Explorer) so the new `DOTNET_ROOT` is picked up, then run `BedrockLauncher.exe`. On the Releases page, `BedrockLauncher-win-x64.zip` is the smaller build made for this setup.
+
+Use a build from this repository rather than an older official release: older releases refuse to start at all unless Developer Mode is on.
 
 If scripts are blocked on your PC, download the **.NET Desktop Runtime 8 Binaries (x64 zip)** from https://dotnet.microsoft.com/en-us/download/dotnet/8.0, extract it to `%LOCALAPPDATA%\Microsoft\dotnet` and set the `DOTNET_ROOT` user environment variable to that folder (Start → "Edit environment variables for your account").
 
