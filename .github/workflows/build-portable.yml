@@ -63,4 +63,6 @@ jobs:
             2. Right-click it, then **Extract All** to a folder you can write to, such as `Documents`.
             3. Open the extracted folder and run `BedrockLauncher.exe`.
 
+            If SmartScreen blocks it, click **More info** then **Run anyway**. If that button is missing, right-click the downloaded zip, choose **Properties**, tick **Unblock**, click **OK**, and extract it again.
+
             Windows Developer Mode still has to be on to install most Minecraft versions, and turning it on needs admin once. See [docs/PORTABLE.md](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/docs/PORTABLE.md).

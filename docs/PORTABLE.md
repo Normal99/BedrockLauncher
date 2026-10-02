@@ -34,8 +34,14 @@ Sign out and back in (or restart Explorer) so the new `DOTNET_ROOT` is picked up
 
 If scripts are blocked on your PC, download the **.NET Desktop Runtime 8 Binaries (x64 zip)** from https://dotnet.microsoft.com/en-us/download/dotnet/8.0, extract it to `%LOCALAPPDATA%\Microsoft\dotnet` and set the `DOTNET_ROOT` user environment variable to that folder (Start → "Edit environment variables for your account").
 
+## SmartScreen blocks the launcher
+The launcher isn't code-signed, so Windows SmartScreen warns about it when it's downloaded from the internet.
+- Click **More info**, then **Run anyway**.
+- If there's no **Run anyway** button: delete the extracted folder, right-click the downloaded `.zip`, choose **Properties**, tick **Unblock** at the bottom, click **OK**, then extract it again. This removes the "downloaded from the internet" mark from every file, so SmartScreen doesn't check them. PowerShell alternative: `Unblock-File BedrockLauncher-portable-win-x64.zip`.
+- If the message says your **organization** or **system administrator** blocked the app, that's a policy such as AppLocker, not SmartScreen, and it can't be bypassed without admin.
+
 ## What a portable build can't fix
-- **Developer Mode.** Installing non-GDK Minecraft versions registers the game from loose files, and Windows only allows that with Developer Mode turned on. The launcher also uses it to create the save-redirection link without admin rights. Turning Developer Mode on needs admin rights once. To check whether it's already on, run:
+- **Developer Mode.** Installing non-GDK Minecraft versions registers the game from loose files, and Windows only allows that with Developer Mode turned on. (Without Developer Mode, the launcher links each profile's save folder using a directory junction instead of a symbolic link, which needs no admin rights.) Turning Developer Mode on needs admin rights once. To check whether it's already on, run:
   ```
   reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock /v AllowDevelopmentWithoutDevLicense
   ```
