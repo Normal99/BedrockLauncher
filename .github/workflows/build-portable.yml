@@ -1,13 +1,18 @@
 name: Build Portable
 
 # Produces a self-contained build that runs without installing the .NET Desktop Runtime.
-# Download it from the run's "Artifacts" section, unzip it anywhere (e.g. Documents or a USB stick)
-# and run BedrockLauncher.exe.
+# - Any push: the build is uploaded as a workflow artifact (needs a GitHub login to download).
+# - Pushing a tag named portable-* (e.g. portable-v1): the zip is also published as a GitHub Release.
+# Unzip it anywhere (e.g. Documents or a USB stick) and run BedrockLauncher.exe.
 
 on:
   workflow_dispatch:
   push:
     branches: '*'
+    tags: 'portable-*'
+
+permissions:
+  contents: write
 
 jobs:
   portable:
@@ -33,3 +38,22 @@ jobs:
         with:
           name: BedrockLauncher-portable-win-x64
           path: out/BedrockLauncher-portable-win-x64
+
+      - name: Zip portable build
+        if: startsWith(github.ref, 'refs/tags/portable-')
+        shell: pwsh
+        run: Compress-Archive -Path out/BedrockLauncher-portable-win-x64 -DestinationPath out/BedrockLauncher-portable-win-x64.zip
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/portable-')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/BedrockLauncher-portable-win-x64.zip
+          body: |
+            Portable build of BedrockLauncher for 64-bit Windows. It includes .NET, so nothing needs to be installed and no admin rights are needed to run it.
+
+            1. Download `BedrockLauncher-portable-win-x64.zip` below.
+            2. Right-click it, then **Extract All** to a folder you can write to, such as `Documents`.
+            3. Open the extracted folder and run `BedrockLauncher.exe`.
+
+            Windows Developer Mode still has to be on to install most Minecraft versions, and turning it on needs admin once. See [docs/PORTABLE.md](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/docs/PORTABLE.md).
