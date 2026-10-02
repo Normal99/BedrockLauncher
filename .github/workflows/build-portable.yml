@@ -2,7 +2,8 @@ name: Build Portable
 
 # Produces a self-contained build that runs without installing the .NET Desktop Runtime.
 # - Any push: the build is uploaded as a workflow artifact (needs a GitHub login to download).
-# - Pushing a tag named portable-* (e.g. portable-v1): the zip is also published as a GitHub Release.
+# - Pushes to the portable branch, or a tag named portable-*: the zip is also published as a
+#   GitHub Release, which anyone can download without a GitHub account.
 # Unzip it anywhere (e.g. Documents or a USB stick) and run BedrockLauncher.exe.
 
 on:
@@ -17,6 +18,8 @@ permissions:
 jobs:
   portable:
     runs-on: windows-latest
+    env:
+      PUBLISH_RELEASE: ${{ github.ref == 'refs/heads/claude/portable-windows-no-admin-wz9yh4' || startsWith(github.ref, 'refs/tags/portable-') }}
 
     steps:
       - name: Checkout code
@@ -40,14 +43,18 @@ jobs:
           path: out/BedrockLauncher-portable-win-x64
 
       - name: Zip portable build
-        if: startsWith(github.ref, 'refs/tags/portable-')
+        if: env.PUBLISH_RELEASE == 'true'
         shell: pwsh
         run: Compress-Archive -Path out/BedrockLauncher-portable-win-x64 -DestinationPath out/BedrockLauncher-portable-win-x64.zip
 
       - name: Publish release
-        if: startsWith(github.ref, 'refs/tags/portable-')
+        if: env.PUBLISH_RELEASE == 'true'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('portable-v{0}', github.run_number) }}
+          name: BedrockLauncher Portable (build ${{ github.run_number }})
+          target_commitish: ${{ github.sha }}
+          make_latest: true
           files: out/BedrockLauncher-portable-win-x64.zip
           body: |
             Portable build of BedrockLauncher for 64-bit Windows. It includes .NET, so nothing needs to be installed and no admin rights are needed to run it.
@@ -56,4 +63,4 @@ jobs:
             2. Right-click it, then **Extract All** to a folder you can write to, such as `Documents`.
             3. Open the extracted folder and run `BedrockLauncher.exe`.
 
-            Windows Developer Mode still has to be on to install most Minecraft versions, and turning it on needs admin once. See [docs/PORTABLE.md](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/docs/PORTABLE.md).
+            Windows Developer Mode still has to be on to install most Minecraft versions, and turning it on needs admin once. See [docs/PORTABLE.md](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/docs/PORTABLE.md).
